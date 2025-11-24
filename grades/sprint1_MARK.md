@@ -36,13 +36,13 @@ Tracking on Trello Total Mark: 0 / 15
 ## Sprint Video Demo (Max 12 marks) 
  
 
-  Your Mark: 11 / 12
+  Your Mark: 10 / 12
 
 ---
 
-**can't find any group under your name the-group-z !! send me an email to change the mark**
+**all members must present! **
 
 ## Total Mark
 
-27 / 64
+62 / 64
 
