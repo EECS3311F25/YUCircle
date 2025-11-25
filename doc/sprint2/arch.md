@@ -63,6 +63,16 @@ Description:
 
 Handle CRUD operations for the student table, which includes, create, read, update, and delete. 
 
+| Property | Description |
+|-----------|-------------|
+| **Class Name** | `CommentController` |
+| **Parent Class** | None |
+| **Subclasses** | None |
+
+Description: 
+
+Handle CRUD operations for the comment table, which includes, create, read, update, and delete, for the posts (comments).
+
 #### Services
 
 General responsibilites:
@@ -79,6 +89,26 @@ Description:
 
 Handle the business logic for our application. 
 
+| Property | Description |
+|-----------|-------------|
+| **Class Name** | `CommentService` |
+| **Parent Class** | None |
+| **Subclasses** | None |
+
+Description: 
+
+Handle comments and business logic for that, calls the DAL (data access layer).
+
+| Property | Description |
+|-----------|-------------|
+| **Class Name** | `AzureOcrService` |
+| **Parent Class** | None |
+| **Subclasses** | None |
+
+Description: 
+
+Logic for connecting to AzureOcr, used to parse images of schedules uploaded by user.
+
 #### Repository
 
 General responsibilites:
@@ -94,6 +124,26 @@ General responsibilites:
 Description: 
 
 This is the data access layer part of our backend. It mimics what you would normally use in a database to apply changes (SQL). 
+
+| Property | Description |
+|-----------|-------------|
+| **Class Name** | `CourseRepo` |
+| **Parent Class** | `JPARepository` |
+| **Subclasses** | None |
+
+Description: 
+
+Used for finding course by its course code.
+
+| Property | Description |
+|-----------|-------------|
+| **Class Name** | `CourseSessionRepo` |
+| **Parent Class** | `JPARepository` |
+| **Subclasses** | None |
+
+Description: 
+
+Check if a course session exists.
 
 #### Entities
 
