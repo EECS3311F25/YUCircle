@@ -7,6 +7,8 @@ import main.repository.PostRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import main.service.CommentService;
+
 
 import java.util.List;
 
@@ -20,6 +22,10 @@ public class CommentController {
 
     @Autowired
     private PostRepo postRepo;
+    
+    @Autowired
+    private CommentService commentService;
+
 
     // Get all comments for a specific post
     @GetMapping("/{postId}")
@@ -56,10 +62,11 @@ public class CommentController {
     // Delete a specific comment
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
-        if (!commentRepo.existsById(commentId)) {
+        try {
+            commentService.deleteComment(commentId);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
-        commentRepo.deleteById(commentId);
-        return ResponseEntity.noContent().build();
     }
 }
