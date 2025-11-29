@@ -9,12 +9,19 @@ export default function UserProfile() {
 
   const [student, setStudent] = useState(null);
   const [posts, setPosts] = useState([]);
+  const { del: deleteComment } = useFetch("http://localhost:8080/api/comments");
+
 
   // COMMENT INPUT per post
   const [commentInputs, setCommentInputs] = useState({});
 
   // OPEN/CLOSE comment sections per post
   const [openComments, setOpenComments] = useState({});
+  
+  // Edit post modal state
+  const [editingPostId, setEditingPostId] = useState(null);
+  const [editContent, setEditContent] = useState("");
+
 
   // PROFILE FIELDS
   const [editingField, setEditingField] = useState(null);
@@ -165,6 +172,66 @@ export default function UserProfile() {
       console.error("Error posting comment:", err);
     }
   }
+  
+  // Delete comment
+  const handleDeleteComment = async (commentId, postId) => {
+	if (!window.confirm("Delete Comment?")) return;
+    try {
+      await deleteComment(`/${commentId}`);
+
+      setPosts(prev =>
+        prev.map(p =>
+          p.id === postId
+            ? { ...p, comments: p.comments.filter(c => c.id !== commentId) }
+            : p
+        )
+      );
+    } catch (err) {
+      console.error("Failed to delete comment:", err);
+    }
+  };
+
+
+  //Edit Post
+  async function handleEditPost(postId) {
+    try {
+      const updated = await fetch(`http://localhost:8080/api/posts/update/${postId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editContent })
+      });
+
+      if (!updated.ok) {
+        console.error("Edit failed");
+        return;
+      }
+
+      // Refresh posts
+      getPosts(`user/${username}`).then(setPosts);
+      setEditingPostId(null);
+
+    } catch (err) {
+      console.error("Error editing post:", err);
+    }
+  }
+
+  //Delete Post
+  async function handleDeletePost(postId) {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+
+    try {
+      await fetch(`http://localhost:8080/api/posts/${postId}`, {
+        method: "DELETE",
+      });
+
+      // Remove from UI
+      setPosts(prev => prev.filter(p => p.id !== postId));
+
+    } catch (err) {
+      console.error("Error deleting post:", err);
+    }
+  }
+
 
 
   // REUSABLE PROFILE FIELD
@@ -429,6 +496,53 @@ export default function UserProfile() {
 
               {/* Like + Comment Row */}
               <div className="flex items-center gap-6 text-sm">
+			  {post.username === username && (
+			    <div className="flex gap-3 ml-auto">
+			      <button 
+			        className="text-gray-500 hover:text-gray-800"
+			        onClick={() => {
+			          setEditingPostId(post.id);
+			          setEditContent(post.content);
+			        }}
+			      >
+			        Edit
+			      </button>
+
+			      <button 
+			        className="text-gray-500 hover:text-gray-800"
+			        onClick={() => handleDeletePost(post.id)}
+			      >
+			        Delete
+			      </button>
+			    </div>
+			  )}
+			  {editingPostId === post.id && (
+			    <div className="border p-3 mt-2 rounded bg-gray-100">
+			      <textarea
+			        className="w-full p-2 border rounded"
+			        rows={3}
+			        value={editContent}
+			        onChange={(e) => setEditContent(e.target.value)}
+			      />
+
+			      <div className="flex gap-3 mt-2">
+			        <button
+			          className="bg-blue-500 text-white px-3 py-1 rounded"
+			          onClick={() => handleEditPost(post.id)}
+			        >
+			          Save
+			        </button>
+			        <button
+			          className="bg-gray-300 px-3 py-1 rounded"
+			          onClick={() => setEditingPostId(null)}
+			        >
+			          Cancel
+			        </button>
+			      </div>
+			    </div>
+			  )}
+
+
                 <button className="flex items-center gap-1" onClick={() => handleLike(post.id)}>
                   ❤️ <span>{post.likes || 0}</span>
                 </button>
@@ -461,7 +575,7 @@ export default function UserProfile() {
                     />
 
                     <button
-                      className="bg-blue-500 text-white px-3 py-1 rounded"
+                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-white"
                       onClick={() => handleComment(post.id)}
                     >
                       Post
@@ -469,12 +583,24 @@ export default function UserProfile() {
                   </div>
 
                   {/* Comment list */}
-                  {post.comments?.map((c) => (
-                    <div key={c.id} className="text-sm">
-                      <span className="font-semibold">{c.username}: </span>
-                      {c.content}
-                    </div>
-                  ))}
+				  <div className="mt-2 space-y-2">
+				    {post.comments?.map((c) => (
+				      <div key={c.id} className="text-sm p-2 bg-white/10 rounded flex justify-between items-start">
+				        <div>
+				          <span className="font-semibold">{c.username}: </span>
+				          {c.content}
+				        </div>
+
+				        {/* Delete Comment Button */}
+				        <button
+				          className="text-gray-500 hover:text-gray-800 text-xs ml-2"
+				          onClick={() => handleDeleteComment(c.id, post.id)}
+				        >
+				          Delete
+				        </button>
+				      </div>
+				    ))}
+				  </div>
                 </div>
               )}
             </div>
