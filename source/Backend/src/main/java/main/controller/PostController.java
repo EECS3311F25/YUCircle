@@ -48,4 +48,27 @@ public class PostController {
         Post updated = postService.toggleLike(id, username);
         return ResponseEntity.ok(updated);
     }
+    
+    //Update Post
+    @PatchMapping("/update/{postId}")
+    public ResponseEntity<Post> updatePost(
+            @PathVariable Long postId,
+            @RequestBody Post updatedPost
+    ) {
+        Post updated = postService.editPost(
+            postId,
+            updatedPost.getContent(),
+            updatedPost.getImageUrl()
+        );
+
+        return ResponseEntity.ok(updated);
+    }
+    
+    //Delete Post
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
+        postService.deletePost(postId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

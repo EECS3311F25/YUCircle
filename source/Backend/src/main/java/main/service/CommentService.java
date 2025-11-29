@@ -30,4 +30,5 @@ public class CommentService {
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         return commentRepo.findByPost(post);
     }
+    
 }
