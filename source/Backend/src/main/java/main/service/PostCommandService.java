@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class PostCommandService {
 
     @Autowired
@@ -66,4 +68,38 @@ public class PostCommandService {
         comment.setPost(post);
         return commentRepo.save(comment);
     }
+    
+    //Edit Post
+    public Post editPost(Long postId, String newContent, String newImageUrl) {
+
+        Post post = postRepo.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        if (newContent != null) {
+            post.setContent(newContent);
+        }
+
+        if (newImageUrl != null) {
+            post.setImageUrl(newImageUrl);
+        }
+
+        return postRepo.save(post);
+    }
+    
+    //Delete Post
+    public void deletePost(Long postId) {
+        if (!postRepo.existsById(postId)) {
+            throw new RuntimeException("Post not found");
+        }
+
+        // Delete likes associated with this post
+        likeRepo.deleteByPostId(postId);
+
+        // Delete comments associated with this post
+        commentRepo.deleteByPostId(postId);
+
+        // Delete the post itself
+        postRepo.deleteById(postId);
+    }
+
 }

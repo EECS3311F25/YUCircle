@@ -6,10 +6,12 @@ import main.repository.CommentRepo;
 import main.repository.PostRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class CommentService {
 
     @Autowired
@@ -30,4 +32,12 @@ public class CommentService {
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         return commentRepo.findByPost(post);
     }
+    
+    public void deleteComment(Long commentId) {
+        if (!commentRepo.existsById(commentId)) {
+            throw new RuntimeException("Comment not found");
+        }
+        commentRepo.deleteById(commentId);
+    }
+
 }
