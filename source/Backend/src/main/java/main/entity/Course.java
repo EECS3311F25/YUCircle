@@ -1,11 +1,14 @@
 package main.entity;
 
+import main.entity.CourseSession;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
