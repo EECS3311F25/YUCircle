@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "package-lock.json": "^1.0.0",
+    "yu-circle": "file:sprint1/Frontend/YUCircle"
+  }
+}
