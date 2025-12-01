@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.time.LocalTime;
 
 @RestController
 @RequestMapping("/api/students/{username}/schedule")
@@ -36,47 +37,6 @@ public class ScheduleController {
         this.studentRepo = studentRepo;
         this.service = service;
     }
-
-    // MIGHT REMOVE: Upload schedule
-//    @PostMapping
-//    public ResponseEntity<List<ParsedScheduleDTO>> uploadSchedule(@PathVariable String username, @RequestParam("file") MultipartFile file) {
-//        // Get student username
-//        // Check a student with this username exists
-//        Student student = studentRepo.findByUsername(username)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
-//
-//        // Print out passed in username
-//        System.out.println("Upload endpoint triggered for username=" + username);
-//
-//        // Check uploaded file properties
-//        System.out.println("Received file contentType=" + file.getContentType() + ", size=" + file.getSize());
-//
-//        // Check if file is empty
-//        if (file.isEmpty()) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file uploaded");
-//        }
-//
-//        // Check the file type
-//        String contentType = file.getContentType();
-//        if (contentType == null) {
-//            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-//                    "File type could not be determined");
-//        }
-//        if (!Arrays.asList(allowedTypes).contains(contentType)) {
-//            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-//                    "Only " + String.join(", ", allowedTypes) + " files are supported");
-//        }
-//
-//        // Check file size
-//        if (file.getSize() > maxSize) {
-//            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE,
-//                    "File size exceeds " + (maxSize / (1024 * 1024)) + " MB limit");
-//        }
-//
-//        // Upload and parse schedule for the user with the given username
-//        List<ParsedScheduleDTO> parsed = service.uploadSchedule(username, file);
-//        return ResponseEntity.ok(parsed);
-//    }
 
     // GET all sessions for a student (aggregate across their courses)
     @GetMapping
@@ -108,6 +68,44 @@ public class ScheduleController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(dtoList);
+    }
+
+    // Edit a course session
+    @PatchMapping("/{sessionId}")
+    public ResponseEntity<ParsedScheduleDTO> updateSession(@PathVariable String username,
+                                                           @PathVariable Long sessionId,
+                                                           @RequestBody Map<String, String> updates) {
+        Optional<Student> studentOpt = service.getStudentByUsername(username);
+        if (studentOpt.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Student with username '" + username + "' not found");
+        }
+
+        CourseSession session = sessionRepo.findById(sessionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Session with ID '" + sessionId + "' not found"));
+
+        // Apply updates (parse times as needed)
+        if (updates.containsKey("day")) session.setDay(updates.get("day"));
+        if (updates.containsKey("startTime")) session.setStartTime(LocalTime.parse(updates.get("startTime")));
+        if (updates.containsKey("endTime")) session.setEndTime(LocalTime.parse(updates.get("endTime")));
+        if (updates.containsKey("location")) session.setLocation(updates.get("location"));
+        if (updates.containsKey("type")) session.setType(updates.get("type"));
+
+        sessionRepo.save(session);
+
+        ParsedScheduleDTO dto = new ParsedScheduleDTO(
+                session.getCSessionId(),
+                session.getCourse().getCourseCode(),
+                session.getCourse().getCourseSection(),
+                session.getType(),
+                session.getDay(),
+                session.getStartTime(),
+                session.getEndTime(),
+                session.getLocation()
+        );
+
+        return ResponseEntity.ok(dto);
     }
 
     // DOUBLE CHECK

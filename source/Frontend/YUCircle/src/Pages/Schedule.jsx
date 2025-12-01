@@ -27,13 +27,14 @@ export default function Schedule() {
   const updateSession = (id, field, value) => {
     const updated = sessions.find(s => s.cSessionId === id);
     if (!updated) return;
-    updated[field] = value;
 
-    // Uncomment when backend PUT is ready
-    // doFetch(`/api/students/${username}/schedule/${id}`, "PUT", updated)
-    //   .then(res => {
-    //     setSessions(sessions.map(s => (s.cSessionId === id ? res : s)));
-    //   });
+    const newSession = { ...updated, [field]: value };
+
+    api.patch(`/students/${username}/schedule/${id}`, { [field]: value })
+      .then(res => {
+        setSessions(sessions.map(s => (s.cSessionId === id ? res : s)));
+      })
+      .catch(err => console.error("Update error:", err));
   };
 
   const deleteSession = (id) => {
@@ -69,15 +70,68 @@ export default function Schedule() {
         </thead>
         <tbody>
           {sessions
-            /*only keep sessions with IDs*/
+            /*only keep sessions with non-null IDs*/
             .filter(session => session.cSessionId != null)
             .map(session => (
               /*have fallbacks just in case*/
               <tr key={session.cSessionId ?? `${session.courseCode}-${session.day}-${session.startTime}`}>
                 <td>{session.courseCode} ({session.section})</td>
-                <td>{session.day}</td>
-                <td>{session.startTime} - {session.endTime}</td>
-                <td>{session.location}</td>
+                {/* Day field */}
+                <td>
+                  <EditText
+                    name="day"
+                    value={session.day}
+                    onChange={(e) => {
+                      const newSessions = sessions.map(s =>
+                        s.cSessionId === session.cSessionId ? { ...s, day: e.target.value } : s
+                      );
+                      setSessions(newSessions);
+                    }}
+                    onSave={({ value }) => updateSession(session.cSessionId, "day", value)}
+                  />
+                </td>
+
+                {/* Time fields */}
+                <td>
+                  <EditText
+                    name="startTime"
+                    value={session.startTime}
+                    onChange={(e) => {
+                      const newSessions = sessions.map(s =>
+                        s.cSessionId === session.cSessionId ? { ...s, startTime: e.target.value } : s
+                      );
+                      setSessions(newSessions);
+                    }}
+                    onSave={({ value }) => updateSession(session.cSessionId, "startTime", value)}
+                  />
+                  {" – "}
+                  <EditText
+                    name="endTime"
+                    value={session.endTime}
+                    onChange={(e) => {
+                      const newSessions = sessions.map(s =>
+                        s.cSessionId === session.cSessionId ? { ...s, endTime: e.target.value } : s
+                      );
+                      setSessions(newSessions);
+                    }}
+                    onSave={({ value }) => updateSession(session.cSessionId, "endTime", value)}
+                  />
+                </td>
+
+                {/* Location field */}
+                <td>
+                  <EditText
+                    name="location"
+                    value={session.location ?? ""}
+                    onChange={(e) => {
+                      const newSessions = sessions.map(s =>
+                        s.cSessionId === session.cSessionId ? { ...s, location: e.target.value } : s
+                      );
+                      setSessions(newSessions);
+                    }}
+                    onSave={({ value }) => updateSession(session.cSessionId, "location", value)}
+                  />
+                </td>
                 <td>
                   <button
                     className="bg-red-500 text-white px-2 py-1 rounded"
