@@ -23,16 +23,16 @@ public class CourseSession {
     private String day;
     private LocalTime startTime;
     private LocalTime endTime;
-    private String room;
+    private String location;
 
     // Constructor without id (for new entities)
     public CourseSession(Course course, String type, String day, LocalTime startTime, LocalTime endTime,
-                         String room) {
+                         String location) {
         this.course = course;
         this.type = type;
         this.day = day;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.room = room;
+        this.location = location;
     }
 }

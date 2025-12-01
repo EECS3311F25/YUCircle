@@ -84,7 +84,7 @@ public class StudentController {
         return service.updateStudent(id, changes);
     }
 
-    // Upload schedule
+    // MIGHT MOVE: Upload schedule
     @PostMapping("/{username}/schedule")
     public ResponseEntity<List<ParsedScheduleDTO>> uploadSchedule(@PathVariable String username, @RequestParam("file") MultipartFile file) {
         // Print out passed in username

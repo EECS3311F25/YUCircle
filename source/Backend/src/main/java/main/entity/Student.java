@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -39,9 +40,11 @@ public class Student {
     private String bio;
 
     @ManyToMany
+    @JsonIgnore
     @JoinTable(
             name = "student_course",
-            joinColumns = @JoinColumn(name = "student_id"),
+            // SHOULD CHANGE to student_number (need to rerun upload schedule?)
+            joinColumns = @JoinColumn(name = "student_number"),
             inverseJoinColumns = @JoinColumn(name = "course_id")
     )
     private Set<Course> courses = new HashSet<>();

@@ -9,6 +9,7 @@ import Landing from "./Pages/Landing"
 import MakePost from "./Pages/MakePost"
 import UserProfile from "./Pages/UserProfile"
 import UploadSchedule from "./Pages/UploadSchedule"
+import Schedule from "./Pages/Schedule"
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -23,6 +24,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="/make-post" element={<MakePost />} />
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/upload-schedule" element={<UploadSchedule />} />
+            <Route path="/schedule" element={<Schedule />} />
           </Routes>
         </div>
       </div>

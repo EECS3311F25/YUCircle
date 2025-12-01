@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -152,10 +153,25 @@ public class StudentCommandService {
             // Persist the updated student with course link
             repo.save(student);
 
+            // Now build DTOs from persisted sessions with IDs
+            List<ParsedScheduleDTO> parsedWithId = student.getCourses().stream()
+                    .flatMap(c -> c.getSessions().stream())
+                    .map(s -> new ParsedScheduleDTO(
+                            s.getCSessionId(),
+                            s.getCourse().getCourseCode(),
+                            s.getCourse().getCourseSection(),
+                            s.getType(),
+                            s.getDay(),
+                            s.getStartTime(),
+                            s.getEndTime(),
+                            s.getLocation()
+                    ))
+                    .collect(Collectors.toList());
+
             // Print parsed info in terminal
             System.out.println("Parsed schedule entries:");
-            parsed.forEach(dto -> System.out.println(dto));
-            return parsed;
+            parsedWithId.forEach(dto -> System.out.println(dto));
+            return parsedWithId;
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to process schedule file", e);
         }
