@@ -6,7 +6,7 @@ Answer the following questions: What did you do since last standup? What are you
 
 **Brandon:** Since last standup, I worked on the next user story that built off of my last story (view-posts) and further impkemented it so that users can now edit and delete their posts, along with being able to delete comments from posts as well. Forward, I will try to work on the next user story of adding a enable dark/light mode feature.
 
-**Ejaaj:** 
+**Ejaaj:** Since last standup, I have tested worked with testing some featues as well as planning for the final Sprint. For this sprint I will be adding notifications for the user, which will be placed in a notification bar either to the side or on the user profile.
 
 **David:** 
 
