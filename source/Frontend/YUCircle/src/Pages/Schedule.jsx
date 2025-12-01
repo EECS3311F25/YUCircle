@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { EditText } from "react-edit-text";
 import "react-edit-text/dist/index.css";
-import useFetch from "../hooks/useFetch";
+import useFetch from "../Hooks/useFetch";
+import AddSessionModal from "../Components/AddSessionModal";
 
 export default function Schedule() {
   const [sessions, setSessions] = useState([]);
   const api = useFetch("http://localhost:8080/api"); // baseUrl
+  const [isModalOpen, setModalOpen] = useState(false);
 
   // Get username from localStorage
     const username = localStorage.getItem("username");
@@ -53,29 +55,21 @@ export default function Schedule() {
       .catch(err => console.error("Delete error:", err));
   };
 
-  const addSession = () => {
-    const newSession = {
-      day: "Monday",
-      startTime: "09:00",
-      endTime: "10:00",
-      room: "TBD",
-      type: "Lecture"
+  const addSession = (newSession) => {
+      api.post(`/students/${username}/schedule/add`, newSession)
+        .then(res => setSessions([...sessions, res]));
     };
-
-    // Uncomment when backend POST is ready
-    // doFetch(`/api/students/${username}/schedule`, "POST", newSession)
-    //   .then(res => setSessions([...sessions, res]));
-  };
 
   return (
     <div className="p-4">
-      <table className="table-auto w-full border">
+      <table className="table-auto w-full border-collapse border border-(--yorku-light-grey) text-center">
         <thead>
           <tr>
-            <th>Day</th>
-            <th>Time</th>
-            <th>Location</th>
-            <th>Actions</th>
+            <th class="border border-(--yorku-light-grey)">Course</th>
+            <th class="border border-(--yorku-light-grey)">Day</th>
+            <th class="border border-(--yorku-light-grey)">Time</th>
+            <th class="border border-(--yorku-light-grey)">Location</th>
+            <th class="border border-(--yorku-light-grey)">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -85,9 +79,9 @@ export default function Schedule() {
             .map(session => (
               /*have fallbacks just in case*/
               <tr key={session.cSessionId ?? `${session.courseCode}-${session.day}-${session.startTime}`}>
-                <td>{session.courseCode} ({session.section})</td>
+                <td class="border border-(--yorku-light-grey)">{session.courseCode} ({session.section})</td>
                 {/* Day field */}
-                <td>
+                <td class="border border-(--yorku-light-grey)">
                   <EditText
                     name="day"
                     value={session.day}
@@ -102,7 +96,7 @@ export default function Schedule() {
                 </td>
 
                 {/* Time fields */}
-                <td>
+                <td class="border border-(--yorku-light-grey)">
                   <EditText
                     name="startTime"
                     value={session.startTime}
@@ -129,7 +123,7 @@ export default function Schedule() {
                 </td>
 
                 {/* Location field */}
-                <td>
+                <td class="border border-(--yorku-light-grey)">
                   <EditText
                     name="location"
                     value={session.location ?? ""}
@@ -142,9 +136,9 @@ export default function Schedule() {
                     onSave={({ value }) => updateSession(session.cSessionId, "location", value)}
                   />
                 </td>
-                <td>
+                <td class="border border-(--yorku-light-grey)">
                   <button
-                    className="bg-red-500 text-white px-2 py-1 rounded"
+                    className="bg-gray-400 text-white px-2 py-1 rounded"
                     onClick={() => {
                       if (window.confirm("Are you sure you want to delete this session?")) {
                         deleteSession(session.cSessionId);
@@ -159,11 +153,16 @@ export default function Schedule() {
         </tbody>
       </table>
       <button
-        className="mt-4 bg-green-500 text-white px-4 py-2 rounded"
-        onClick={addSession}
+        className="bg-(--yorku-red) text-white px-2 py-1 m-4 rounded"
+        onClick={() => setModalOpen(true)}
       >
         Add Session
       </button>
+      <AddSessionModal
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={addSession}
+      />
     </div>
   );
 }

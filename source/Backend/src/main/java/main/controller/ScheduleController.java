@@ -134,4 +134,50 @@ public class ScheduleController {
         // Return 204 no content when session is removed
         return ResponseEntity.noContent().build();
     }
+
+    // Add new course sessions
+    @PostMapping("/add")
+    public ResponseEntity<ParsedScheduleDTO> addSession(@PathVariable String username,
+                                                        @RequestBody Map<String, String> body) {
+        Student student = studentRepo.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+
+        String courseCode = body.get("courseCode");
+        String section = body.get("section");
+
+        // Find or create the course
+        Course course = courseRepo.findByCourseCodeAndCourseSection(courseCode, section)
+                .orElseGet(() -> courseRepo.save(new Course(courseCode, section)));
+
+        // Ensure student-course link
+        if (!course.getStudents().contains(student)) {
+            course.getStudents().add(student);
+            student.getCourses().add(course);
+        }
+
+        // Create the new session
+        CourseSession session = new CourseSession(
+                course,
+                body.get("type"),
+                body.get("day"),
+                LocalTime.parse(body.get("startTime")),
+                LocalTime.parse(body.get("endTime")),
+                body.get("location")
+        );
+
+        sessionRepo.save(session);
+
+        ParsedScheduleDTO dto = new ParsedScheduleDTO(
+                session.getCSessionId(),
+                course.getCourseCode(),
+                course.getCourseSection(),
+                session.getType(),
+                session.getDay(),
+                session.getStartTime(),
+                session.getEndTime(),
+                session.getLocation()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+    }
 }

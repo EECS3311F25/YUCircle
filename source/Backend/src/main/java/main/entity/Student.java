@@ -43,7 +43,6 @@ public class Student {
     @JsonIgnore
     @JoinTable(
             name = "student_course",
-            // SHOULD CHANGE to student_number (need to rerun upload schedule?)
             joinColumns = @JoinColumn(name = "student_number"),
             inverseJoinColumns = @JoinColumn(name = "course_id")
     )
