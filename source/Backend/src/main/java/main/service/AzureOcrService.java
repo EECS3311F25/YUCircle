@@ -194,6 +194,7 @@ public class AzureOcrService {
         }
         return text.replaceAll("[\\r\\n]+", " ")
                 .replaceAll("\\s{2,}", " ")
+                .replace("_", " ")
                 .trim();
     }
 

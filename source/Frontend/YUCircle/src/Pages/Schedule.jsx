@@ -38,9 +38,19 @@ export default function Schedule() {
   };
 
   const deleteSession = (id) => {
-    // Uncomment when backend DELETE is ready
-    // doFetch(`/api/students/${username}/schedule/${id}`, "DELETE")
-    //   .then(() => setSessions(sessions.filter(s => s.cSessionId !== id)));
+    // Optimistically update UI
+    setSessions(prevSessions => prevSessions.filter(s => s.cSessionId !== id));
+
+    // Call backend
+    api.del(`/students/${username}/schedule/${id}`)
+      .then(() => {
+        // Re-fetch to ensure consistency
+        return api.get(`/students/${username}/schedule`);
+      })
+      .then(data => {
+        setSessions(data); // overwrite with fresh backend state
+      })
+      .catch(err => console.error("Delete error:", err));
   };
 
   const addSession = () => {
@@ -135,7 +145,11 @@ export default function Schedule() {
                 <td>
                   <button
                     className="bg-red-500 text-white px-2 py-1 rounded"
-                    onClick={() => deleteSession(session.cSessionId)}
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to delete this session?")) {
+                        deleteSession(session.cSessionId);
+                      }
+                    }}
                   >
                     Delete
                   </button>

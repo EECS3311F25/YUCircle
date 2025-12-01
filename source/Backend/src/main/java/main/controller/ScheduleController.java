@@ -108,83 +108,30 @@ public class ScheduleController {
         return ResponseEntity.ok(dto);
     }
 
-    // DOUBLE CHECK
-//    // POST add new session to a course the student is enrolled in
-//    @PostMapping("/{courseId}")
-//    public ResponseEntity<CourseSession> addSession(@PathVariable String username,
-//                                                    @PathVariable Long courseId,
-//                                                    @RequestBody CourseSession newSession) {
-//        // Get student username
-//        // Check a student with this username exists
-//        Student student = studentRepo.findByUsername(username)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
-//
-//        Course course = courseRepo.findById(courseId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-//
-//        if (!student.getCourses().contains(course)) {
-//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Student not enrolled in this course");
-//        }
-//
-//        newSession.setCourse(course);
-//        CourseSession saved = sessionRepo.save(newSession);
-//        return ResponseEntity.ok(saved);
-//    }
-//
-//    // PUT update a session (only if it belongs to a course the student is enrolled in)
-//    @PutMapping("/{courseId}/{sessionId}")
-//    public ResponseEntity<CourseSession> updateSession(@PathVariable String username,
-//                                                       @PathVariable Long courseId,
-//                                                       @PathVariable Long sessionId,
-//                                                       @RequestBody CourseSession updated) {
-//        // Get student username
-//        // Check a student with this username exists
-//        Student student = studentRepo.findByUsername(username)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
-//
-//        Course course = courseRepo.findById(courseId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-//
-//        if (!student.getCourses().contains(course)) {
-//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Student not enrolled in this course");
-//        }
-//
-//        return sessionRepo.findById(sessionId)
-//                .filter(s -> s.getCourse().equals(course))
-//                .map(session -> {
-//                    session.setType(updated.getType());
-//                    session.setDay(updated.getDay());
-//                    session.setStartTime(updated.getStartTime());
-//                    session.setEndTime(updated.getEndTime());
-//                    session.setRoom(updated.getRoom());
-//                    return ResponseEntity.ok(sessionRepo.save(session));
-//                })
-//                .orElse(ResponseEntity.notFound().build());
-//    }
-//
-//    // DELETE a session (only if it belongs to a course the student is enrolled in)
-//    @DeleteMapping("/{courseId}/{sessionId}")
-//    public ResponseEntity<Void> deleteSession(@PathVariable String username,
-//                                              @PathVariable Long courseId,
-//                                              @PathVariable Long sessionId) {
-//        // Get student username
-//        // Check a student with this username exists
-//        Student student = studentRepo.findByUsername(username)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
-//
-//        Course course = courseRepo.findById(courseId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-//
-//        if (!student.getCourses().contains(course)) {
-//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Student not enrolled in this course");
-//        }
-//
-//        return sessionRepo.findById(sessionId)
-//                .filter(s -> s.getCourse().equals(course))
-//                .map(session -> {
-//                    sessionRepo.delete(session);
-//                    return ResponseEntity.noContent().build();
-//                })
-//                .orElse(ResponseEntity.notFound().build());
-//    }
+    // Delete a course session
+    @DeleteMapping("/{sessionId}")
+    public ResponseEntity<Void> deleteSession(@PathVariable String username,
+                                              @PathVariable Long sessionId) {
+        Optional<Student> studentOpt = service.getStudentByUsername(username);
+        if (studentOpt.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Student with username '" + username + "' not found");
+        }
+
+        CourseSession session = sessionRepo.findById(sessionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Session with ID '" + sessionId + "' not found"));
+
+        // Remove the session
+        sessionRepo.delete(session);
+
+        // If the removed session is the only one left for a course, remove the course too
+        Course course = session.getCourse();
+        if (course.getSessions().isEmpty()) {
+            courseRepo.delete(course);
+        }
+
+        // Return 204 no content when session is removed
+        return ResponseEntity.noContent().build();
+    }
 }
