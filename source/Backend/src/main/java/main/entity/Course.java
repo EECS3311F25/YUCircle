@@ -30,8 +30,8 @@ public class Course {
     String courseCode;
     @Column(nullable = false)  // Use section as part of composite key
     String courseSection;
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CourseSession> sessions = new ArrayList<>();
+    //@OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+   // private List<CourseSession> sessions = new ArrayList<>();
 
     @ManyToMany(mappedBy = "courses")
     private Set<Student> students = new HashSet<>();

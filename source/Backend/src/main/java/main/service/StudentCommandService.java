@@ -104,6 +104,7 @@ public class StudentCommandService {
     }
 
 
+
     @Transactional
     public List<ParsedScheduleDTO> uploadSchedule(String username, MultipartFile file) {
         // Get Azure Document Intelligence to parse the file into DTOs
