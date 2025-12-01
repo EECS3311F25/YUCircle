@@ -12,13 +12,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/posts")
-@CrossOrigin(origins = "http://localhost:5173") //allows frontend access
+@CrossOrigin(origins = "http://localhost:5173")
 public class PostController {
 
     @Autowired
     private PostCommandService postService;
 
-    //create a new post
+    // Create post
     @PostMapping("/create")
     public ResponseEntity<Map<String, Object>> createPost(@RequestBody Post post) {
         Post newPost = postService.createPost(post);
@@ -30,9 +30,22 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
-
+    // Get all posts (newest first)
     @GetMapping("/all")
     public List<Post> getAllPosts() {
         return postService.getAllPosts();
+    }
+
+    //Get posts by username (newest first)
+    @GetMapping("/user/{username}")
+    public List<Post> getPostsByUser(@PathVariable String username) {
+        return postService.getPostsByUser(username);
+    }
+
+    // Like/unlike post
+    @PutMapping("/{id}/like")
+    public ResponseEntity<Post> toggleLike(@PathVariable Long id, @RequestParam String username) {
+        Post updated = postService.toggleLike(id, username);
+        return ResponseEntity.ok(updated);
     }
 }
