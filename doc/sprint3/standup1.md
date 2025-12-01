@@ -4,7 +4,7 @@ Answer the following questions: What did you do since last standup? What are you
 
 **Jason:** 
 
-**Brandon:** 
+**Brandon:** Since last standup, I worked on the next user story that built off of my last story (view-posts) and further impkemented it so that users can now edit and delete their posts, along with being able to delete comments from posts as well. Forward, I will try to work on the next user story of adding a enable dark/light mode feature.
 
 **Ejaaj:** 
 
