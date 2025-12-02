@@ -6,7 +6,7 @@ Answer the following questions: What did you do since last standup? What are you
 
 **Brandon:** I finished the edit/delete post as well as finished the delete comment feature. There were some bugs when implementing the delete comment logic wise, but was able to fix the errors.I will continue to QA test my branch/user story in preparation for the demo.
 
-**Ejaaj:** 
+**Ejaaj:** I've just sent a pull request for YU-11, the notification feature. I plan to merge it after careful review from me and my team members.
 
 **David:** 
 
