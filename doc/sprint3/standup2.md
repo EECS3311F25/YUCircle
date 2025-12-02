@@ -2,7 +2,7 @@
 
 Answer the following questions: What did you do since last standup? What are you planning/continuing to do? Any blockages?
 
-**Jason:** 
+**Jason:** Since last standup, I completed the chat feature. Right now, I finishing the edit/delete messages, and stuent group. I also reviewed some pull requests from my fellow peers to merge to main.
 
 **Brandon:** I finished the edit/delete post as well as finished the delete comment feature. There were some bugs when implementing the delete comment logic wise, but was able to fix the errors.I will continue to QA test my branch/user story in preparation for the demo.
 
