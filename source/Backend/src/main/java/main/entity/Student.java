@@ -39,7 +39,7 @@ public class Student {
     private String major;
     private String bio;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonIgnore
     @JoinTable(
             name = "student_course",
