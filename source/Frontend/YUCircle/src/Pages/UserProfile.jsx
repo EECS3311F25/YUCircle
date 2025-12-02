@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import useFetch from "../Hooks/useFetch";
+import NotificationBanner from "../Components/NotificationBanner";
+
 
 export default function UserProfile() {
   const { get, patch } = useFetch("http://localhost:8080/api/students/");
@@ -74,22 +76,25 @@ export default function UserProfile() {
   async function handleSaveField(field) {
     setSaving(true);
     setMessage(null);
-
+  
     try {
       const updated = await patch(`update/${username}`, {
         [field]: fieldValues[field],
       });
-
+  
       setStudent(updated);
       setEditingField(null);
       setMessage("Saved!");
+      // trigger immediate refresh for banner
+      window.dispatchEvent(new Event("refreshNotifications"));
       setTimeout(() => setMessage(null), 2000);
     } catch {
       setMessage("Error saving.");
     }
-
+  
     setSaving(false);
   }
+  
 
   // PASSWORD RESET
   async function handleResetPassword() {
@@ -112,7 +117,10 @@ export default function UserProfile() {
         currentPassword,
         newPassword,
       });
-      setPasswordMessage("Password updated successfully!");
+      // after successful password update
+    setPasswordMessage("Password updated successfully!");
+    window.dispatchEvent(new Event("refreshNotifications"));
+
       setPasswordValues({
         currentPassword: "",
         newPassword: "",
@@ -140,6 +148,12 @@ export default function UserProfile() {
     });
 
     getPosts(`user/${username}`).then(setPosts);
+    // after getPosts(...)
+    if (typeof window !== "undefined") {
+    // simple event to tell banner to refresh — easiest is to use a custom event or lift state.
+    window.dispatchEvent(new Event("refreshNotifications"));
+    }
+
   }
 
   //Submit comment
@@ -240,6 +254,7 @@ export default function UserProfile() {
 
     return (
       <div className="mb-4">
+        <NotificationBanner username={username} />
         <div className="flex items-center justify-between mb-1">
           <div className="text-xs text-white/80">{label}</div>
 

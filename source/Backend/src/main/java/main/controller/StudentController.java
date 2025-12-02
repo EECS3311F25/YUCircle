@@ -73,45 +73,46 @@ public class StudentController {
         return service.updateStudent(id, changes);
     }
 
-    // PATCH endpoint to update specific fields via username
-    @PatchMapping("/update/{username}")
-    public ResponseEntity<?> updateFields(
-            @PathVariable String username,
-            @RequestBody Map<String, String> updates) {
-    
-        Optional<Student> studentOpt = service.getStudentByUsername(username);
-        if (studentOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "Student not found"));
-        }
-    
-        Student student = studentOpt.get();
-    
-        // Apply allowed updates
-        updates.forEach((key, value) -> {
-            if (value == null) return;
-    
-            switch (key) {
-                case "firstName" -> student.setFirstName(value);
-                case "lastName" -> student.setLastName(value);
-                case "major" -> student.setMajor(value);
-                case "bio" -> student.setBio(value);
-                case "newPassword" -> {
-                    String current = updates.get("currentPassword");
-                    if (current == null || !service.checkPassword(student, current)) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password incorrect");
-                    }
-                    service.updatePassword(student, value);
-                }
-                // username & email NOT allowed
-            }
-        });
-    
-        // DIRECT SAVE — do NOT call updateStudent()
-        Student saved = service.saveDirect(student);
-    
-        return ResponseEntity.ok(saved);
+// PATCH endpoint to update specific fields via username
+@PatchMapping("/update/{username}")
+public ResponseEntity<?> updateFields(
+        @PathVariable String username,
+        @RequestBody Map<String, String> updates) {
+
+    Optional<Student> studentOpt = service.getStudentByUsername(username);
+    if (studentOpt.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", "Student not found"));
     }
-    
+
+    Student student = studentOpt.get();
+
+    // Apply allowed updates
+    updates.forEach((key, value) -> {
+        if (value == null) return;
+
+        switch (key) {
+            case "firstName" -> student.setFirstName(value);
+            case "lastName" -> student.setLastName(value);
+            case "major" -> student.setMajor(value);
+            case "bio" -> student.setBio(value);
+            case "newPassword" -> {
+                String current = updates.get("currentPassword");
+                if (current == null || !service.checkPassword(student, current)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password incorrect");
+                }
+                service.updatePassword(student, value);
+            }
+            // username & email NOT allowed
+        }
+    });
+
+    // Uses updateStudent(...) so notification logic runs
+    Student saved = service.updateStudent(student.getStudentNumber(), student);
+
+    return ResponseEntity.ok(saved);
+    }
 }
+
+
  
