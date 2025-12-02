@@ -6,7 +6,7 @@ Answer the following questions: What did you do since last standup? What are you
 
 **Brandon:**
 
-**Ejaaj:**
+**Ejaaj:** I have completed the notification feature (YUC-11) and fully merged into the main branch. All that's left is to test with all the other features. 
 
 **David:**
 
