@@ -6,6 +6,7 @@ import main.repository.StudentRepo;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import main.service.NotificationService; // added import
 
 import java.util.List;
 import java.util.Optional;
@@ -16,10 +17,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class StudentCommandService {
 
     private final StudentRepo repo;
+    private final NotificationService notificationService; // injected
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public StudentCommandService(StudentRepo repo) {
+    // constructor injection
+    public StudentCommandService(StudentRepo repo, NotificationService notificationService) {
         this.repo = repo;
+        this.notificationService = notificationService;
     }
 
     // Check if password matches
@@ -87,10 +91,26 @@ public class StudentCommandService {
         if (changes.getMajor() != null) s.setMajor(changes.getMajor());
         if (changes.getBio() != null) s.setBio(changes.getBio());
 
-        return repo.save(s);
+        Student saved = repo.save(s);
+
+        // Create a profile-edit notification for the user themselves
+        try {
+            String username = saved.getUsername();
+            if (username != null) {
+                String msg = "You updated your profile.";
+                notificationService.createNotification(username, username, "PROFILE_EDIT", msg, null);
+            }
+        } catch (Exception e) {
+            // Avoid surfacing notification creation failure to main flow.
+            // Optionally log the error if you have logging available.
+            System.err.println("Failed to create profile edit notification: " + e.getMessage());
+        }
+
+        return saved;
     }
+
     public Student saveDirect(Student s) {
         return repo.save(s);
     }
-    
+
 }
