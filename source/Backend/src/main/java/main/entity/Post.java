@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "posts")
 public class Post {
@@ -21,7 +23,13 @@ public class Post {
 
     private LocalDateTime timestamp = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(
+    	    mappedBy = "post",
+    	    cascade = CascadeType.ALL,
+    	    orphanRemoval = true,
+    	    fetch = FetchType.EAGER
+    	)
+    	@JsonManagedReference
     private List<Comment> comments = new ArrayList<>();
 
     public Post() {}

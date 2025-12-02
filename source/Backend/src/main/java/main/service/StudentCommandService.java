@@ -1,7 +1,6 @@
 package main.service;
 
 import main.dto.StudentDTO;
-import main.dto.ParsedScheduleDTO;
 import main.entity.Student;
 import main.entity.Course;
 import main.entity.CourseSession;
@@ -13,8 +12,6 @@ import main.mapper.ScheduleMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,16 +24,9 @@ public class StudentCommandService {
 
     private final StudentRepo repo;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    private final CourseRepo courseRepo;
-    private final CourseSessionRepo sessionRepo;
-    private final AzureOcrService ocrService;
 
-    public StudentCommandService(StudentRepo repo, CourseRepo courseRepo,
-                                 CourseSessionRepo sessionRepo, AzureOcrService ocrService) {
+    public StudentCommandService(StudentRepo repo) {
         this.repo = repo;
-        this.courseRepo = courseRepo;
-        this.sessionRepo = sessionRepo;
-        this.ocrService = ocrService;
     }
 
     // Check if password matches

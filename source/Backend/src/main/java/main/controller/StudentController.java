@@ -1,22 +1,17 @@
 package main.controller;
 
 import main.dto.StudentDTO;
-import main.dto.ParsedScheduleDTO;
 import main.entity.Student;
 import main.service.StudentCommandService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Arrays;
-
 
 @RestController
 @RequestMapping("/api/students")
@@ -24,12 +19,6 @@ import java.util.Arrays;
 public class StudentController {
 
     private final StudentCommandService service;
-
-    // For uploadSchedule validation
-    @Value("${upload.max-size}")
-    private long maxSize;  // // Current limit: 4 MB (https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/prebuilt/layout?view=doc-intel-4.0.0&tabs=rest%2Csample-code#input-requirements)
-    @Value("${upload.allowed-types}")
-    private String[] allowedTypes;
 
     public StudentController(StudentCommandService service) {
         this.service = service;
@@ -120,44 +109,7 @@ public class StudentController {
         return ResponseEntity.ok(parsed);
     }
 
-    // PATCH endpoint to update specific fields via username
-    @PatchMapping("/update/{username}")
-    public ResponseEntity<?> updateFields(
-            @PathVariable String username,
-            @RequestBody Map<String, String> updates) {
 
-        Optional<Student> studentOpt = service.getStudentByUsername(username);
-        if (studentOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "Student not found"));
-        }
-
-        Student student = studentOpt.get();
-
-        // Apply allowed updates
-        updates.forEach((key, value) -> {
-            if (value == null) return;
-
-            switch (key) {
-                case "firstName" -> student.setFirstName(value);
-                case "lastName" -> student.setLastName(value);
-                case "major" -> student.setMajor(value);
-                case "bio" -> student.setBio(value);
-                case "newPassword" -> {
-                    String current = updates.get("currentPassword");
-                    if (current == null || !service.checkPassword(student, current)) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password incorrect");
-                    }
-                    service.updatePassword(student, value);
-                }
-                // username & email NOT allowed
-            }
-        });
-
-        // DIRECT SAVE — do NOT call updateStudent()
-        Student saved = service.saveDirect(student);
-
-        return ResponseEntity.ok(saved);
-    }
-
+    
 }
+ 
