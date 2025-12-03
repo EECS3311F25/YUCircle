@@ -1,14 +1,24 @@
 package main.service;
 
 import main.dto.StudentDTO;
+import main.dto.ParsedScheduleDTO;
 import main.entity.Student;
+import main.entity.Course;
+import main.entity.CourseSession;
 import main.repository.StudentRepo;
+import main.repository.CourseRepo;
+import main.repository.CourseSessionRepo;
+import main.mapper.ScheduleMapper;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -17,9 +27,16 @@ public class StudentCommandService {
 
     private final StudentRepo repo;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final CourseRepo courseRepo;
+    private final CourseSessionRepo sessionRepo;
+    private final AzureOcrService ocrService;
 
-    public StudentCommandService(StudentRepo repo) {
+    public StudentCommandService(StudentRepo repo, CourseRepo courseRepo,
+                                 CourseSessionRepo sessionRepo, AzureOcrService ocrService) {
         this.repo = repo;
+        this.courseRepo = courseRepo;
+        this.sessionRepo = sessionRepo;
+        this.ocrService = ocrService;
     }
 
     // Check if password matches
@@ -92,5 +109,72 @@ public class StudentCommandService {
     public Student saveDirect(Student s) {
         return repo.save(s);
     }
-    
+
+
+    @Transactional
+    public List<ParsedScheduleDTO> uploadSchedule(String username, MultipartFile file) {
+        // Get Azure Document Intelligence to parse the file into DTOs
+        try {
+            List<ParsedScheduleDTO> parsed = ocrService.extractScheduleFromFile(file);
+
+            // Find the student who uploaded the schedule
+            Student student = repo.findByUsername(username)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+
+            // Iterate through DTOs
+            for (ParsedScheduleDTO dto : parsed) {
+                // Get the course if it already exists in the database
+                Course course = courseRepo.findByCourseCodeAndCourseSection(dto.courseCode(), dto.section())
+                        .orElseGet(() -> {
+                            // If not found, create a new Course entity
+                            Course newCourse = ScheduleMapper.toCourse(dto);
+                            // Persist the new course
+                            return courseRepo.save(newCourse);
+                        });
+
+                // Link the course to the student and vice versa
+                course.getStudents().add(student);
+                student.getCourses().add(course);
+
+                // Check if the session already exists
+                boolean exists = sessionRepo.existsByCourseAndDayAndStartTime(course, dto.day(), dto.startTime());
+                if (!exists) {
+                    // Create a new CourseSession entity
+                    CourseSession session = ScheduleMapper.toSession(dto, course);
+
+                    // Link the session to its associated course and vice versa
+                    session.setCourse(course);
+                    course.getSessions().add(session);
+
+                    // Persist the new session
+                    sessionRepo.save(session);
+                }
+            }
+            // Persist the updated student with course link
+            repo.save(student);
+
+            // Now build DTOs from persisted sessions with IDs
+            List<ParsedScheduleDTO> parsedWithId = student.getCourses().stream()
+                    .flatMap(c -> c.getSessions().stream())
+                    .map(s -> new ParsedScheduleDTO(
+                            s.getCSessionId(),
+                            s.getCourse().getCourseCode(),
+                            s.getCourse().getCourseSection(),
+                            s.getType(),
+                            s.getDay(),
+                            s.getStartTime(),
+                            s.getEndTime(),
+                            s.getLocation()
+                    ))
+                    .collect(Collectors.toList());
+
+            // Print parsed info in terminal
+            System.out.println("Parsed schedule entries:");
+            parsedWithId.forEach(dto -> System.out.println(dto));
+            return parsedWithId;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to process schedule file", e);
+        }
+    }
+
 }
