@@ -1,6 +1,7 @@
 package main.service;
 
 import main.dto.StudentDTO;
+import main.dto.ParsedScheduleDTO;
 import main.entity.Student;
 import main.entity.Course;
 import main.entity.CourseSession;
@@ -12,7 +13,8 @@ import main.mapper.ScheduleMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
-import main.service.NotificationService; // added import
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,13 +26,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class StudentCommandService {
 
     private final StudentRepo repo;
-    private final NotificationService notificationService; // injected
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final CourseRepo courseRepo;
+    private final CourseSessionRepo sessionRepo;
+    private final AzureOcrService ocrService;
 
-    // constructor injection
-    public StudentCommandService(StudentRepo repo, NotificationService notificationService) {
+    public StudentCommandService(StudentRepo repo, CourseRepo courseRepo,
+                                 CourseSessionRepo sessionRepo, AzureOcrService ocrService) {
         this.repo = repo;
-        this.notificationService = notificationService;
+        this.courseRepo = courseRepo;
+        this.sessionRepo = sessionRepo;
+        this.ocrService = ocrService;
     }
 
     // Check if password matches
@@ -98,24 +104,8 @@ public class StudentCommandService {
         if (changes.getMajor() != null) s.setMajor(changes.getMajor());
         if (changes.getBio() != null) s.setBio(changes.getBio());
 
-        Student saved = repo.save(s);
-
-        // Create a profile-edit notification for the user themselves
-        try {
-            String username = saved.getUsername();
-            if (username != null) {
-                String msg = "You updated your profile.";
-                notificationService.createNotification(username, username, "PROFILE_EDIT", msg, null);
-            }
-        } catch (Exception e) {
-            // Avoid surfacing notification creation failure to main flow.
-            // Optionally log the error if you have logging available.
-            System.err.println("Failed to create profile edit notification: " + e.getMessage());
-        }
-
-        return saved;
+        return repo.save(s);
     }
-
     public Student saveDirect(Student s) {
         return repo.save(s);
     }

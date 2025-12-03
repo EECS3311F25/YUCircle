@@ -23,7 +23,24 @@ import java.util.Set;
 @AllArgsConstructor // Adds a constructor with all fields
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Course {
+    @EqualsAndHashCode.Include
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long courseId;
+
     String courseName;
+    @Column(nullable = false) // Use courseCode as part of composite key
     String courseCode;
-    char courseSection;
+    @Column(nullable = false) // Use section as part of composite key
+    String courseSection;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CourseSession> sessions = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "courses")
+    private Set<Student> students = new HashSet<>();
+    // Constructor with only courseCode and courseSection
+    public Course(String courseCode, String courseSection) {
+        this.courseCode = courseCode;
+        this.courseSection = courseSection;
+    }
 }
