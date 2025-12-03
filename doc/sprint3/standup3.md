@@ -10,4 +10,4 @@ Answer the following questions: What did you do since last standup? What are you
 
 **David:**
 
-**Alice:**
+**Alice:** Since the last standup, I was working on the feature to see when students are available. However, there were blockers in merging the edit schedule code and that has led to stalled progress on the availability feature. I am still working on that feature and trying to get the merged code to work.
