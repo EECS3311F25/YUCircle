@@ -77,8 +77,11 @@ export default function Sidebar() {
             <Link to="/make-post" className="pb-2 pl-4 pt-2 border-b border-white hover:bg-(--yorku-blue) transition-colors duration-300 cursor-pointer">
             Make a Post
           </Link>
-            <Link to="/profile" className="pb-2 pl-4 pt-2 border-b border-white hover:bg-(--yorku-blue) transition-colors duration-300 cursor-pointer">
+            <Link to="/upload-schedule" className="pb-2 pl-4 pt-2 border-b border-white hover:bg-(--yorku-blue) transition-colors duration-300 cursor-pointer">
             Upload Schedule
+          </Link>
+            <Link to="/schedule" className="pb-2 pl-4 pt-2 border-b border-white hover:bg-(--yorku-blue) transition-colors duration-300 cursor-pointer">
+            Schedule
           </Link>
           </>
         )}
