@@ -83,6 +83,9 @@ export default function Sidebar() {
             <Link to="/schedule" className="pb-2 pl-4 pt-2 border-b border-white hover:bg-(--yorku-blue) transition-colors duration-300 cursor-pointer">
             Schedule
           </Link>
+            <Link to="/availability" className="pb-2 pl-4 pt-2 border-b border-white hover:bg-(--yorku-blue) transition-colors duration-300 cursor-pointer">
+            Availability
+          </Link>
           </>
         )}
 
