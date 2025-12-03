@@ -73,7 +73,7 @@ public class StudentController {
         return service.updateStudent(id, changes);
     }
 
-    // MIGHT MOVE: Upload schedule
+
     @PostMapping("/{username}/schedule")
     public ResponseEntity<List<ParsedScheduleDTO>> uploadSchedule(@PathVariable String username, @RequestParam("file") MultipartFile file) {
         // Print out passed in username
@@ -108,8 +108,7 @@ public class StudentController {
         List<ParsedScheduleDTO> parsed = service.uploadSchedule(username, file);
         return ResponseEntity.ok(parsed);
     }
-
-
-    
 }
+
+
  
